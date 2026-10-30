@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Hero Section with Search Bar (Week 6) -->
+<section class="hero-section">
+    <div class="hero-card">
+        <div class="hero-content">
+            <span class="hero-eyebrow">Discover &bull; Learn &bull; Share</span>
+            <h1 class="hero-title">Insights, Stories &amp; Tutorials from Creators</h1>
+            <p class="hero-description">
+                A clean, responsive blogging platform built with Flask, SQLAlchemy, and modern web design principles.
+            </p>
+
+            <!-- Search Form -->
+            <form action="{{ url_for('home') }}" method="GET" class="search-bar-form">
+                {% if active_category and active_category != 'All' %}
+                    <input type="hidden" name="category" value="{{ active_category }}">
+                {% endif %}
+                <div class="search-input-group">
+                    <span class="search-icon">🔍</span>
+                    <input type="text"
+                           name="q"
+                           value="{{ search_query }}"
+                           placeholder="Search articles by title, content, or tags..."
+                           class="search-input"
+                           autocomplete="off">
+                    {% if search_query %}
+                        <a href="{{ url_for('home', category=active_category if active_category != 'All' else None) }}"
+                           class="search-clear-btn"
+                           title="Clear search query">&times;</a>
+                    {% endif %}
+                    <button type="submit" class="btn-primary search-submit-btn">Search</button>
+                </div>
+            </form>
+
+            <div class="hero-actions">
+                {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('create_post') }}" class="btn-primary btn-sm">+ Write New Story</a>
+                    <a href="{{ url_for('dashboard') }}" class="btn-secondary btn-sm">My Dashboard &rarr;</a>
+                {% else %}
+                    <a href="{{ url_for('register') }}" class="btn-primary btn-sm">Start Writing Free</a>
+                    <a href="{{ url_for('about') }}" class="btn-secondary btn-sm">Explore Project &rarr;</a>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="hero-metrics">
+            <div class="metric-card">
+                <span class="metric-number">{{ posts|length }}</span>
+                <span class="metric-label">Results</span>
+            </div>
+            <div class="metric-card">
+                <span class="metric-number">{{ categories|length - 1 }}</span>
+                <span class="metric-label">Topics</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Category Filtering Bar -->
+<section class="category-filter-section">
+    <div class="category-scroll-container">
+        {% for cat in categories %}
+            <a href="{{ url_for('home', category=cat, q=search_query if search_query else None) }}"
+               class="category-chip {% if active_category == cat and not active_tag %}active{% endif %}">
+                {{ cat }}
+            </a>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- Active Filters Breadcrumb (Week 6) -->
+{% if search_query or active_tag or (active_category and active_category != 'All') %}
+<section class="active-filters-bar">
+    <span class="filter-label">Active Filters:</span>
+    <div class="filter-pills-list">
+        {% if active_category and active_category != 'All' %}
+            <span class="filter-badge">
+                Category: <strong>{{ active_category }}</strong>
+                <a href="{{ url_for('home', q=search_query if search_query else None, tag=active_tag if active_tag else None) }}">&times;</a>
+            </span>
+        {% endif %}
+
+        {% if search_query %}
+            <span class="filter-badge">
+                Query: <strong>"{{ search_query }}"</strong>
+                <a href="{{ url_for('home', category=active_category if active_category != 'All' else None, tag=active_tag if active_tag else None) }}">&times;</a>
+            </span>
+        {% endif %}
+
+        {% if active_tag %}
+            <span class="filter-badge">
+                Tag: <strong>#{{ active_tag }}</strong>
+                <a href="{{ url_for('home', category=active_category if active_category != 'All' else None, q=search_query if search_query else None) }}">&times;</a>
+            </span>
+        {% endif %}
+
+        <a href="{{ url_for('home') }}" class="clear-all-link">Clear all</a>
+    </div>
+</section>
+{% endif %}
+
+<!-- Main Articles Feed -->
+<section class="posts-section">
+    <div class="section-header">
+        <div>
+            <h2>
+                {% if search_query %}
+                    Search results for "{{ search_query }}"
+                {% elif active_tag %}
+                    Articles tagged with #{{ active_tag }}
+                {% elif active_category != 'All' %}
+                    Articles in {{ active_category }}
+                {% else %}
+                    All Recent Articles
+                {% endif %}
+            </h2>
+            <p class="subtitle">Showing {{ posts|length }} publication{% if posts|length != 1 %}s{% endif %}</p>
+        </div>
+    </div>
+
+    <div class="posts-grid">
+        {% for post in posts %}
+        <article class="post-card">
+            <div class="post-card-top">
+                <a href="{{ url_for('home', category=post.category) }}" class="category-pill-link">
+                    <span class="category-pill">{{ post.category }}</span>
+                </a>
+                <div class="post-card-meta-badges">
+                    <span class="reading-time-pill">{{ post.content | reading_time }}</span>
+                    <span class="comments-badge">💬 {{ post.comments|length }}</span>
+                </div>
+            </div>
+
+            <h3 class="post-title">
+                <a href="{{ url_for('post_detail', post_id=post.id) }}">{{ post.title }}</a>
+            </h3>
+
+            <p class="post-excerpt">{{ post.content[:150] }}{% if post.content|length > 150 %}...{% endif %}</p>
+
+            {% if post.tags %}
+            <div class="post-tags-mini">
+                {% for tag in post.tag_list() %}
+                    <a href="{{ url_for('home', tag=tag) }}" class="tag-pill-mini">#{{ tag }}</a>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="post-footer">
+                <div class="post-author-block">
+                    <span class="author-mini-avatar">{{ post.author.username[0]|upper }}</span>
+                    <div class="author-mini-text">
+                        <span class="author-name">{{ post.author.username }}</span>
+                        <span class="post-date">{{ post.date_posted.strftime('%b %d, %Y') }}</span>
+                    </div>
+                </div>
+                <a href="{{ url_for('post_detail', post_id=post.id) }}" class="read-link">Read &rarr;</a>
+            </div>
+        </article>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">🔍</div>
+            <h3>No matching articles found</h3>
+            <p class="text-muted">
+                {% if search_query %}
+                    We couldn't find any articles matching "<strong>{{ search_query }}</strong>".
+                {% else %}
+                    There are no publications matching the selected filters.
+                {% endif %}
+            </p>
+            <a href="{{ url_for('home') }}" class="btn-primary mt-4">Reset Search &amp; Filters</a>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

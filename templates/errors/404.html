@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="error-page-wrapper">
+    <div class="error-card">
+        <span class="error-code">404</span>
+        <h1 class="error-title">Page Not Found</h1>
+        <p class="error-description">
+            The page or article you are looking for does not exist, has been removed, or the link may be mistyped.
+        </p>
+        <div class="error-actions">
+            <a href="{{ url_for('home') }}" class="btn-primary">Back to Articles</a>
+            <a href="{{ url_for('about') }}" class="btn-outline">About Project</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

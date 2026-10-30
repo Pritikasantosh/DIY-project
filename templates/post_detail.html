@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block content %}
+<article class="single-post-wrapper">
+    <div class="single-post-card">
+        <!-- Breadcrumb Navigation -->
+        <nav class="breadcrumb-nav">
+            <a href="{{ url_for('home') }}">&larr; Back to Articles</a>
+            <span class="breadcrumb-sep">/</span>
+            <a href="{{ url_for('home', category=post.category) }}">{{ post.category }}</a>
+        </nav>
+
+        <!-- Post Header -->
+        <header class="single-post-header">
+            <div class="post-meta-row">
+                <span class="category-pill">{{ post.category }}</span>
+                <span class="reading-time-pill">{{ post.content | reading_time }}</span>
+                <span class="post-date">{{ post.date_posted.strftime('%B %d, %Y at %I:%M %p') }}</span>
+            </div>
+
+            <h1 class="single-post-title">{{ post.title }}</h1>
+
+            <div class="single-post-author-row">
+                <div class="author-info">
+                    <span class="author-avatar">{{ post.author.username[0] | upper }}</span>
+                    <div>
+                        <div class="author-title">Published by <strong>{{ post.author.username }}</strong></div>
+                        <div class="author-sub">Community Contributor</div>
+                    </div>
+                </div>
+
+                <!-- Author Actions (Edit & Delete) -->
+                {% if current_user.is_authenticated and current_user == post.author %}
+                <div class="post-action-buttons">
+                    <a href="{{ url_for('edit_post', post_id=post.id) }}" class="btn-sm btn-edit">Edit Post</a>
+                    <form action="{{ url_for('delete_post', post_id=post.id) }}" method="POST" onsubmit="return confirm('Are you sure you want to permanently delete this post?');" style="display:inline;">
+                        <button type="submit" class="btn-sm btn-delete">Delete</button>
+                    </form>
+                </div>
+                {% endif %}
+            </div>
+        </header>
+
+        <!-- Post Content Body -->
+        <div class="single-post-body">
+            <p>{{ post.content | replace('\n', '<br>') | safe }}</p>
+        </div>
+
+        <!-- Post Tags -->
+        {% if post.tags %}
+        <div class="post-tags-container">
+            <span class="tags-label">Topics:</span>
+            {% for tag in post.tag_list() %}
+                <a href="{{ url_for('home', tag=tag) }}" class="tag-pill">#{{ tag }}</a>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <hr class="divider">
+
+        <!-- Comments Section (Week 5) -->
+        <section class="comments-section" id="comments">
+            <div class="comments-header">
+                <h3>Discussion ({{ post.comments|length }})</h3>
+                <p class="subtitle">Join the conversation and share your feedback.</p>
+            </div>
+
+            <!-- Comment Input Box -->
+            {% if current_user.is_authenticated %}
+            <div class="comment-input-box">
+                <form method="POST" action="{{ url_for('post_detail', post_id=post.id) }}" novalidate>
+                    {{ comment_form.hidden_tag() }}
+                    <div class="form-group">
+                        {{ comment_form.content(class="form-control comment-textarea", rows="3", placeholder="Write a thoughtful comment...") }}
+                        {% if comment_form.content.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in comment_form.content.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="comment-submit-row">
+                        {{ comment_form.submit(class="btn-primary btn-sm") }}
+                    </div>
+                </form>
+            </div>
+            {% else %}
+            <div class="comment-login-prompt">
+                <p>Have something to say? <a href="{{ url_for('login', next=request.path) }}">Log in</a> or <a href="{{ url_for('register') }}">create an account</a> to join the conversation.</p>
+            </div>
+            {% endif %}
+
+            <!-- Comments List -->
+            <div class="comments-list">
+                {% for comment in post.comments %}
+                <div class="comment-item">
+                    <div class="comment-avatar">
+                        {{ comment.author.username[0]|upper }}
+                    </div>
+                    <div class="comment-content-area">
+                        <div class="comment-header-row">
+                            <span class="comment-author-name">{{ comment.author.username }}</span>
+                            <span class="comment-date">{{ comment.date_posted.strftime('%b %d, %Y at %I:%M %p') }}</span>
+
+                            <!-- Delete Option (Author of comment or author of post) -->
+                            {% if current_user.is_authenticated and (current_user == comment.author or current_user == post.author) %}
+                            <form action="{{ url_for('delete_comment', comment_id=comment.id) }}" method="POST" onsubmit="return confirm('Remove this comment?');" class="comment-delete-form">
+                                <button type="submit" class="comment-delete-btn" title="Delete comment">&times;</button>
+                            </form>
+                            {% endif %}
+                        </div>
+                        <p class="comment-text">{{ comment.content | replace('\n', '<br>') | safe }}</p>
+                    </div>
+                </div>
+                {% else %}
+                <div class="no-comments-box">
+                    <p>No comments yet. Be the first to start the discussion!</p>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <hr class="divider">
+
+        <!-- Post Footer Call to Action -->
+        <div class="single-post-footer">
+            <a href="{{ url_for('home') }}" class="btn-outline">&larr; Explore More Stories</a>
+            {% if current_user.is_authenticated %}
+                <a href="{{ url_for('create_post') }}" class="btn-primary btn-sm">+ Write an Article</a>
+            {% endif %}
+        </div>
+    </div>
+</article>
+{% endblock %}

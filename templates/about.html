@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="about-section">
+    <div class="content-card">
+        <h1>About This Project</h1>
+        <p class="lead-text">
+            This web application is developed as part of an intensive 8-week DIY internship project,
+            showcasing modern Python web development using the Flask framework.
+        </p>
+
+        <hr class="divider">
+
+        <h2>Project Roadmap</h2>
+        <div class="roadmap-grid">
+            <div class="roadmap-card active-week">
+                <span class="step-num">Week 1</span>
+                <h3>Project Setup & Routing</h3>
+                <p>Environment configuration, Jinja2 template inheritance, and core routing. (Current Stage)</p>
+            </div>
+            <div class="roadmap-card">
+                <span class="step-num">Week 2</span>
+                <h3>User Authentication</h3>
+                <p>Registration, secure password hashing, and user login with Flask-Login.</p>
+            </div>
+            <div class="roadmap-card">
+                <span class="step-num">Week 3</span>
+                <h3>Blog Post CRUD</h3>
+                <p>Database models with Flask-SQLAlchemy, create, read, update, and delete posts.</p>
+            </div>
+            <div class="roadmap-card">
+                <span class="step-num">Week 4-8</span>
+                <h3>UI, Comments & Launch</h3>
+                <p>Responsive design, user comments, search & filters, and deployment.</p>
+            </div>
+        </div>
+
+        <hr class="divider">
+
+        <h2>Technology Stack</h2>
+        <ul class="tech-list">
+            <li><strong>Backend:</strong> Python 3, Flask</li>
+            <li><strong>Templating:</strong> Jinja2</li>
+            <li><strong>Frontend:</strong> HTML5, CSS3, JavaScript</li>
+            <li><strong>Database (Coming Week 3):</strong> SQLite & Flask-SQLAlchemy</li>
+        </ul>
+    </div>
+</section>
+{% endblock %}

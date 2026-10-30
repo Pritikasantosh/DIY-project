@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="dashboard-wrapper">
+    <!-- User Profile Header Card -->
+    <div class="profile-card">
+        <div class="profile-avatar">
+            {{ current_user.username[0] | upper }}
+        </div>
+        <div class="profile-info">
+            <h2>{{ current_user.username }}</h2>
+            <p class="profile-email">{{ current_user.email }}</p>
+            <p class="profile-date">Member since: {{ current_user.date_joined.strftime('%B %d, %Y') }}</p>
+        </div>
+        <div class="profile-action">
+            <a href="{{ url_for('create_post') }}" class="btn-primary">+ Create New Post</a>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="dashboard-grid">
+        <div class="stat-card">
+            <h3>{{ posts | length }}</h3>
+            <p>My Published Posts</p>
+        </div>
+        <div class="stat-card">
+            <h3>{{ comments_count }}</h3>
+            <p>Comments on My Posts</p>
+        </div>
+        <div class="stat-card">
+            <h3>Active</h3>
+            <p>Account Status</p>
+        </div>
+    </div>
+
+    <!-- User Posts Management (CRUD) -->
+    <div class="content-card mt-4">
+        <div class="dashboard-header-row">
+            <div>
+                <h3>My Blog Posts ({{ posts | length }})</h3>
+                <p class="subtitle">Manage, edit, view, or remove your published articles.</p>
+            </div>
+            <a href="{{ url_for('create_post') }}" class="btn-primary btn-sm">+ New Post</a>
+        </div>
+
+        {% if posts %}
+        <div class="table-responsive">
+            <table class="dashboard-table">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Category</th>
+                        <th>Published Date</th>
+                        <th class="text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for post in posts %}
+                    <tr>
+                        <td>
+                            <a href="{{ url_for('post_detail', post_id=post.id) }}" class="table-post-title">
+                                {{ post.title }}
+                            </a>
+                        </td>
+                        <td><span class="category-pill">{{ post.category }}</span></td>
+                        <td class="text-muted">{{ post.date_posted.strftime('%b %d, %Y') }}</td>
+                        <td class="text-right table-actions">
+                            <a href="{{ url_for('post_detail', post_id=post.id) }}" class="btn-sm btn-outline">View</a>
+                            <a href="{{ url_for('edit_post', post_id=post.id) }}" class="btn-sm btn-edit">Edit</a>
+                            <form action="{{ url_for('delete_post', post_id=post.id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this post?');" style="display:inline;">
+                                <button type="submit" class="btn-sm btn-delete">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <h4>You haven't written any blog posts yet.</h4>
+            <p class="text-muted">Click the button below to publish your first article!</p>
+            <a href="{{ url_for('create_post') }}" class="btn-primary mt-4">+ Write First Post</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

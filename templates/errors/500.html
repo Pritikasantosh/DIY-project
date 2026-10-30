@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="error-page-wrapper">
+    <div class="error-card">
+        <span class="error-code">500</span>
+        <h1 class="error-title">Internal Server Error</h1>
+        <p class="error-description">
+            Something unexpected occurred on the server. Our development team has been alerted, and the error has been logged.
+        </p>
+        <div class="error-actions">
+            <a href="{{ url_for('home') }}" class="btn-primary">Return to Homepage</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
